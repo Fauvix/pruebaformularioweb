@@ -2,50 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Bloc de Notas</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 30px; }
-        input, button { padding: 8px; margin: 5px 0; }
-        ul { margin-top: 20px; }
-        li { margin: 5px 0; border-bottom: 1px solid #ccc; padding: 5px; }
-    </style>
+    <title>Mi Primera Página</title>
 </head>
 <body>
-<h1>Bloc de Notas</h1>
-
-<input type="text" id="inputTexto" placeholder="Escribe algo...">
-<button onclick="guardarTexto()">Guardar</button>
-
-<ul id="listaTextos"></ul>
-
-<script>
-    // Función para cargar los textos desde LocalStorage
-    function cargarTextos() {
-        const lista = document.getElementById('listaTextos');
-        lista.innerHTML = ""; // Limpiar lista
-        const textos = JSON.parse(localStorage.getItem('misTextos')) || [];
-        textos.forEach((texto, index) => {
-            const li = document.createElement('li');
-            li.textContent = texto;
-            lista.appendChild(li);
-        });
-    }
-
-    // Función para guardar un nuevo texto
-    function guardarTexto() {
-        const input = document.getElementById('inputTexto');
-        const nuevoTexto = input.value.trim();
-        if (nuevoTexto === "") return; // No guardar vacío
-
-        const textos = JSON.parse(localStorage.getItem('misTextos')) || [];
-        textos.push(nuevoTexto); // Añadir nuevo texto
-        localStorage.setItem('misTextos', JSON.stringify(textos)); // Guardar de nuevo
-        input.value = ""; // Limpiar input
-        cargarTextos(); // Actualizar lista
-    }
-
-    // Cargar textos al iniciar la página
-    cargarTextos();
-</script>
+    <h1>Hola</h1>
 </body>
 </html>
