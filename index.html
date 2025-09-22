@@ -71,11 +71,39 @@
     function isLikelyGithubUrl(url) {
       try {
         const u = new URL(url);
-        // aceptar github.com y subdominios si hay
         return u.hostname.toLowerCase().endsWith('github.com') && /^\/[^\/\s]+\/?$/.test(u.pathname);
       } catch(e) {
         return false;
       }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function mostrarResultado(name, github) {
+      const safeName = escapeHtml(name);
+      const safeUrl = github;
+
+      cardContent.innerHTML = `
+        <div style="font-weight:700">${safeName}</div>
+        <div style="margin-top:6px">
+          <a class="profile" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>
+        </div>
+      `;
+
+      openBtn.onclick = () => window.open(safeUrl, '_blank', 'noopener');
+      copyBtn.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(safeUrl);
+          copyBtn.textContent = 'Copiado ✓';
+          setTimeout(() => (copyBtn.textContent = 'Copiar URL'), 1500);
+        } catch {
+          copyBtn.textContent = 'Error copia';
+        }
+      };
+
+      result.style.display = 'block';
     }
 
     form.addEventListener('submit', (e) => {
@@ -91,7 +119,6 @@
         return;
       }
 
-      // Si el usuario puso solo usuario, intenta completar
       if (/^[a-zA-Z0-9-_]+$/.test(github)) {
         github = `https://github.com/${github}`;
       }
@@ -101,27 +128,11 @@
         return;
       }
 
-      // Construir UI de resultado
-      const safeName = escapeHtml(name);
-      const safeUrl = github;
-      cardContent.innerHTML = `
-        <div style="font-weight:700">${safeName}</div>
-        <div style="margin-top:6px">
-          <a class="profile" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>
-        </div>
-      `;
-      openBtn.onclick = () => window.open(safeUrl, '_blank', 'noopener');
-      copyBtn.onclick = async () => {
-        try {
-          await navigator.clipboard.writeText(safeUrl);
-          copyBtn.textContent = 'Copiado ✓';
-          setTimeout(() => (copyBtn.textContent = 'Copiar URL'), 1500);
-        } catch {
-          copyBtn.textContent = 'Error copia';
-        }
-      };
+      // Guardar en localStorage
+      localStorage.setItem('ghName', name);
+      localStorage.setItem('ghUrl', github);
 
-      result.style.display = 'block';
+      mostrarResultado(name, github);
     });
 
     resetBtn.addEventListener('click', () => {
@@ -129,12 +140,20 @@
       githubInput.value = '';
       errorDiv.textContent = '';
       result.style.display = 'none';
+      localStorage.removeItem('ghName');
+      localStorage.removeItem('ghUrl');
     });
 
-    // pequeño escape para evitar inyección en el innerHTML del nombre
-    function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    }
+    // Al cargar la página, recuperar datos guardados
+    window.addEventListener('load', () => {
+      const savedName = localStorage.getItem('ghName');
+      const savedUrl = localStorage.getItem('ghUrl');
+      if (savedName && savedUrl) {
+        nameInput.value = savedName;
+        githubInput.value = savedUrl;
+        mostrarResultado(savedName, savedUrl);
+      }
+    });
   </script>
 </body>
 </html>
